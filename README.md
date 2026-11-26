@@ -1,41 +1,48 @@
-# GenAI: Catch 'Em All! ⚡
+# GenAI: Catch 'Em All!
 
-Generating new Pokémon sprites with Variational Autoencoders (VAE) and Generative Adversarial Networks (GAN) using PyTorch.
+Generating Pokémon sprites with Variational Autoencoders (VAE) and Generative Adversarial Networks (GAN) in PyTorch.
 
-This project was developed as part of the M2 Vision et Machine Intelligente (VMI) Generative AI lab at Université Paris Cité.
+M2 Vision et Machine Intelligente — Generative AI lab, Université Paris Cité.
+
+## Experimental setup
+
+40,597 RGB sprites resized to 64 × 64 pixels, split by Pokémon folder into 32,469 training and 8,128 validation images. Six configurations were trained for 20 epochs with batch size 128, Adam and seed 42.
+
+## VAE experiments
+
+| Model | Latent dimension | Learning rate | FID ↓ | KID ↓ | MSE ↓ | PSNR ↑ | SSIM ↑ |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| VAE1 | 128 | 0.001 | 292.48 | 0.2662 | 0.03389 | 14.96 | 0.4199 |
+| VAE2 | 64 | 0.001 | 293.76 | 0.2688 | 0.03495 | 14.83 | 0.4129 |
+| VAE3 | 128 | 0.0005 | **290.44** | **0.2579** | **0.03050** | **15.42** | **0.4512** |
+
+VAE3 performed best on the final reconstruction and generation metrics. Training and validation losses suggest possible overfitting.
+
+## GAN experiments
+
+All three GANs use latent dimension 100.
+
+| Model | Generator LR | Discriminator LR | FID ↓ | KID ↓ | Final G loss | Final D loss | D accuracy |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| GAN1 | 0.0002 | 0.0002 | 201.83 | 0.1350 | 3.701 | 0.631 | 87.78% |
+| GAN2 | 0.0002 | 0.0001 | **201.07** | **0.1332** | 3.234 | 0.314 | 97.44% |
+| GAN3 | 0.0002 | 0.00005 | 227.19 | 0.1881 | 1.573 | 0.719 | 90.06% |
+
+GAN2 achieved the lowest FID and KID, although its advantage over GAN1 was small. GAN3 had a lower generator loss but worse distribution metrics.
+
+## Discussion
+
+GAN2 obtained better generation metrics than VAE3, while VAE3 trained faster (270.56 s versus 985.31 s, excluding evaluation and plotting). Each configuration was run once, so small differences are not evidence of statistical significance. FID and KID use 512 real and 512 generated images and Inception features pretrained on natural images, which limits their interpretation for sprites.
 
 ## Notebook
 
-[Explore the executed notebook](./genai-catch-em-all%20%281%29.ipynb) for the implementation, training curves, generated sprites, latent interpolations and evaluation results.
+[Initial executed VAE/GAN notebook](./genai-catch-em-all%20%281%29.ipynb). The six-configuration results above are from a subsequent experimental run; the repository notebook is still the initial version until the latest executed notebook is uploaded.
 
-## Approach
-
-- **VAE:** learns a probabilistic latent representation through reconstruction and KL divergence.
-- **GAN:** trains a generator and discriminator through adversarial learning.
-- Both models are trained for 20 epochs, with held-out data used for evaluation.
-
-## Results
-
-| Metric | VAE | GAN |
-|---|---:|---:|
-| FID ↓ | 308.57 | **232.91** |
-| KID ↓ | 0.259301 | **0.131353** |
-| Training time (s) ↓ | **274.71** | 994.40 |
-| Training throughput (images/s) ↑ | **2363.84** | 653.04 |
-
-VAE reconstruction metrics: MSE = 0.033014, PSNR = 15.08 dB, SSIM = 0.430009.
-
-The GAN achieved lower FID and KID scores, while the VAE trained faster. The VAE showed signs of overfitting, and the GAN discriminator reached 99.77% training accuracy, suggesting an imbalance in adversarial training.
-
-FID and KID should be interpreted cautiously: the evaluation uses a limited sample size and Inception features pretrained on natural images rather than Pokémon sprites. Training times exclude evaluation and plotting.
-
-## Running the project
-
-Open the notebook in Kaggle, enable a GPU accelerator and Internet access, and run the cells in order. The notebook includes dataset preparation, model training, evaluation and checkpoint saving.
+To run on Kaggle, enable GPU acceleration and Internet access, then execute the cells in order.
 
 ## Credits
 
-- Course lab: Generative AI, Université Paris Cité.
+- Generative AI course lab, Université Paris Cité.
 - Exercises adapted from [Dive into Deep Learning](https://d2l.ai/).
 - Sprite source: [Pokémon Database](https://pokemondb.net/sprites).
-- Pokémon images © Nintendo/Game Freak, as credited in the original lab. This is an educational, unofficial project.
+- Pokémon images © Nintendo/Game Freak, as credited in the original lab. Educational, unofficial project.
